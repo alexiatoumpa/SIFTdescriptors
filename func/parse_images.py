@@ -1,26 +1,8 @@
-#
-# Copyright (C) 2019 University of Leeds
-# Author: Alexia Toumpa
-# email: scat@leeds.ac.uk
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>
-#
-
 import __init__ as init
 
 # Export output
 from write_data import WriteInFile
+from sift import SIFTdesc
 
 import argparse
 import cv2
@@ -39,10 +21,7 @@ import csv
 from scipy import ndimage
 
 
-
 def ProcessImages():
-
-
     # Parse the directory
     PATH = '/home/scat/Datasets/CAD-120/images_objects/images/'
 
@@ -61,7 +40,6 @@ def ProcessImages():
                     
                     lendir = len(os.listdir(objects))/2
 
-                
                     for fr in range(frame_init,lendir+1,1):
                         imgname = objects + 'obj_'+ obj[-1:] + '_RGB_' + str(fr) + '.png'
                         img = cv2.imread(imgname)
@@ -70,11 +48,11 @@ def ProcessImages():
                         dimg = cv2.imread(dimgname,0)
                         rgbdimg = cv2.cvtColor(dimg, cv2.COLOR_GRAY2RGB)
 
-                        test_image = imgname
-                        oriImg = cv2.imread(test_image) # B,G,R order
-                        boxsize = 480
-                        scale = boxsize / (oriImg.shape[0] * 1.0)
-                        img = cv2.resize(oriImg, (0,0), fx = scale, fy = scale, interpolation = cv2.INTER_CUBIC)
+                        #test_image = imgname
+                        #oriImg = cv2.imread(test_image) # B,G,R order
+                        #boxsize = 480
+                        #scale = boxsize / (oriImg.shape[0] * 1.0)
+                        #img = cv2.resize(oriImg, (0,0), fx = scale, fy = scale, interpolation = cv2.INTER_CUBIC)
 
 
                         # ------------------- For the Objects -------------------#
@@ -86,6 +64,7 @@ def ProcessImages():
                             this_object_id = numo + 1
                             _y = len(img)
                             _x = len(img[0])
+
             
                             # Keep in depth_info all the depth information of the objects' bounding box.
                             depth_info = []
@@ -135,7 +114,7 @@ def ProcessImages():
                                 init.divider = 1.0
                                     
                                 if thres_area > init.MAX_thres_area: # CONCAVE OBJECT
-                                    objTYPE[fr][numo] = 'concave'
+                                    #objTYPE[fr][numo] = 'concave'
                                     init.divider = 5.0 # 4.0 is GOOD # PARAMETER
                                     section = thres_area / init.divider
 
@@ -146,61 +125,32 @@ def ProcessImages():
                                     for x in range(int(_x)):
                                         for y in range(int(_y)):
                                             datapoint = dimg[y][x]
-                                            if datapoint>= minDeepdatapoint and datapoint <= thres_max: # BLUE: the furthest away object area (concave curve)                                      
-                                                cv2.circle(img,(x,y),1,[255,0,0],-1)
-                                                
-                                            elif datapoint >= minDeepdatapoint-section and datapoint <= minDeepdatapoint:
-                                                cv2.circle(img,(x,y),1,[0,255,255],-1) # YELLOW: the middle object area
-                                            elif datapoint >= thres_min and datapoint <= minDeepdatapoint-section:
-                                                cv2.circle(img,(x,y),1,[150,150,40],-1) # CYAN: the closest object area
-                                            elif datapoint > thres_max:
-                                                cv2.circle(img,(x,y),1,[0,0,0],-1) # BLACK: the furthest away
-                                            else: # datapoint < thres_min
-                                                cv2.circle(img,(x,y),1,[0,0,255],-1) # RED: the closest or noise
-                                    """
-                                    Find which of the concave objects are actual concave and which of them are convex long surfaces.
-                                    To differentiate between these two we search for the concave curve by:
-                                    - finding the contour of the BLUE area
-                                    - define the hierarchy of the contours and pick the inner child if it significant enough in terms of area occupying.
-                                    """
-                                        
-                                    if is_this_convex:
-                                        # this is a convex object
-                                        objTYPE[fr][numo] = 'convex_surface'
-                                        objTHRES[numo][0] = thres_min # data_min
-                                        objTHRES[numo][1] = thres_max # data_max
-                                        for x in range(int(_x)):
-                                            for y in range(int(_y)):
-                                                datapoint = dimg[y][x]
-                                                if datapoint >= thres_min and datapoint <= thres_max:
-                                                    #if datapoint>= depth_list[0] and datapoint <= depth_list[len(depth_list)-1]:
-                                                    cv2.circle(img,(x,y),1,[0,0,0],-1)
-                                                else:
-                                                    cv2.circle(img,(x,y),1,[255,255,255],-1)
+                                            #if datapoint>= minDeepdatapoint and datapoint <= thres_max: # BLUE: the furthest away object area (concave curve)                                      
+                                            #    cv2.circle(img,(x,y),1,[255,0,0],-1)    
+                                            #elif datapoint >= minDeepdatapoint-section and datapoint <= minDeepdatapoint:
+                                            #    cv2.circle(img,(x,y),1,[0,255,255],-1) # YELLOW: the middle object area
+                                            #elif datapoint >= thres_min and datapoint <= minDeepdatapoint-section:
+                                            #    cv2.circle(img,(x,y),1,[150,150,40],-1) # CYAN: the closest object area
+                                            
+                                            if datapoint > thres_max:
+                                                cv2.circle(img,(x,y),1,[0,255,0],-1) # GREEN: the furthest away
+                                            elif datapoint < thres_min: # datapoint < thres_min
+                                                cv2.circle(img,(x,y),1,[0,255,0],-1) # RED: the closest or noise
                                             
                                            
 
                                 else: # CONVEX OBJECT
-                                    objTYPE[fr][numo] = 'convex'
+                                    #objTYPE[fr][numo] = 'convex'
                                     objTHRES[numo][0] = thres_min # data_min
                                     objTHRES[numo][1] = thres_max # data_max
                                     for x in range(int(_x)):
                                         for y in range(int(_y)):
                                             datapoint = dimg[y][x]
-                                            if datapoint>= depth_list[0] and datapoint <= depth_list[len(depth_list)-1]:
+                                            if datapoint < depth_list[0] or datapoint > depth_list[len(depth_list)-1]:
                                                 cv2.circle(img,(x,y),1,[0,255,0],-1)
-                            
-                            #else: # object out of the reange of the sensor; cannot say the type of the object.
-                            #    objTYPE[fr][numo] = 'notype'
-                            #"""
-                            #Consider for process all objects that are not 'notype'
-                            #"""
-                            #if objTYPE[fr][numo] != 'notype':                 
-                            #    # Get center of bounding box of tracked object.
-                            #    bbox_x, bbox_y = centerBB(0, 0, _x, _y)      
-                            #    xs, ys = sizeBB(0, 0, _x, _y)
 
                         # ------------------- End of Objects -------------------#
+                        img = SIFTdesc(img, select_kp=True)
 
 
                         cv2.imshow('CAD-120: QSR for bounding boxes',img) 
