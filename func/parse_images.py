@@ -19,7 +19,7 @@ from itertools import combinations
 import copy
 import csv
 from scipy import ndimage
-
+from PIL import Image
 
 def ProcessImages():
     # Parse the directory
@@ -134,8 +134,8 @@ def ProcessImages():
                                             
                                             if datapoint > thres_max:
                                                 cv2.circle(img,(x,y),1,[0,255,0],-1) # GREEN: the furthest away
-                                            elif datapoint < thres_min: # datapoint < thres_min
-                                                cv2.circle(img,(x,y),1,[0,255,0],-1) # RED: the closest or noise
+                                            #elif datapoint < thres_min: # datapoint < thres_min
+                                            #    cv2.circle(img,(x,y),1,[0,255,0],-1) # RED: the closest or noise
                                             
                                            
 
@@ -152,8 +152,9 @@ def ProcessImages():
                         # ------------------- End of Objects -------------------#
                         img = SIFTdesc(img, select_kp=True)
 
-
-                        cv2.imshow('CAD-120: QSR for bounding boxes',img) 
+			img2 = Image.fromarray(img, 'RGB')
+                        cv2.imshow('CAD-120: QSR for bounding boxes',img)
+			img2.show() 
 
                         k = cv2.waitKey(30) & 0xff
                         #'''
