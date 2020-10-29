@@ -18,4 +18,7 @@ def SIFTdesc(image, select_kp=False, kp_number=50):
 
 	cv2.drawKeypoints(gray, kp, image, flags = cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-	return image
+	return image, desc
+
+
+#def SIFTnormalize(desc):

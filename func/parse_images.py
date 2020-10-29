@@ -150,8 +150,9 @@ def ProcessImages():
                                                 cv2.circle(img,(x,y),1,[0,255,0],-1)
 
                         # ------------------- End of Objects -------------------#
-                        img = SIFTdesc(img, select_kp=True)
-
+                        img, desc = SIFTdesc(img, select_kp=True)
+			#norm_desc = SIFTnormalize(desc)
+			
 			img2 = Image.fromarray(img, 'RGB')
                         cv2.imshow('CAD-120: QSR for bounding boxes',img)
 			img2.show() 
